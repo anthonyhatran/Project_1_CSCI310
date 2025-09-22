@@ -3,9 +3,10 @@ package com.example.myapplication;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.view.View;
+import android.os.Handler;
 import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.TextView;
@@ -28,6 +29,20 @@ public class MainActivity extends AppCompatActivity {
     private int flagsRemaining = NUM_MINES;
     private boolean isGameOver = false;
 
+    private Handler timerHandler = new Handler();
+    private int secondsElapsed = 0;
+    private boolean isTimerStarted = false;
+    private boolean hasWon = false;
+
+    private Runnable timerRunnable = new Runnable() {
+        @Override
+        public void run() {
+            secondsElapsed++;
+            timerTextView.setText("Time: " + secondsElapsed);
+            timerHandler.postDelayed(this, 1000);
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,8 +59,15 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupGame() {
         isGameOver = false;
+        hasWon = false;
         flagsRemaining = NUM_MINES;
         mineCountTextView.setText("Mines: " + flagsRemaining);
+
+        // Reset and stop timer
+        isTimerStarted = false;
+        secondsElapsed = 0;
+        timerTextView.setText("Time: 0");
+        timerHandler.removeCallbacks(timerRunnable);
 
         initializeCells();
         placeMines();
@@ -126,14 +148,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void onCellClicked(int row, int col) {
-        if (isGameOver || cells[row][col].isRevealed()) {
+        if (isGameOver) {
+            Intent intent = new Intent(MainActivity.this, ResultActivity.class);
+            intent.putExtra("GAME_WON", hasWon);
+            intent.putExtra("TIME_USED", secondsElapsed);
+            startActivity(intent);
+            finish();
+            return;
+        }
+
+        if (cells[row][col].isRevealed()) {
             return;
         }
 
         if (modeButton.isChecked()) {
             toggleFlag(row, col);
-        }
-        else {
+        } else {
             revealCell(row, col);
         }
     }
@@ -153,13 +183,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void revealCell(int row, int col) {
-        Cell cell = cells[row][col];
 
+    private void revealCell(int row, int col) {
+        if (!isTimerStarted && !modeButton.isChecked()) {
+            timerHandler.postDelayed(timerRunnable, 1000);
+            isTimerStarted = true;
+        }
+
+        Cell cell = cells[row][col];
         if (cell.isFlagged() || cell.isRevealed()) {
             return;
         }
-
         cell.setRevealed(true);
         cellButtons[row][col].setEnabled(false);
         cellButtons[row][col].setBackgroundColor(ContextCompat.getColor(this, R.color.cell_revealed));
@@ -172,8 +206,7 @@ public class MainActivity extends AppCompatActivity {
         if (cell.getAdjacentMines() > 0) {
             cellButtons[row][col].setText(String.valueOf(cell.getAdjacentMines()));
             cellButtons[row][col].setTextColor(Color.BLACK);
-        }
-        else {
+        } else {
             for (int dr = -1; dr <= 1; dr++) {
                 for (int dc = -1; dc <= 1; dc++) {
                     int ni = row + dr;
@@ -190,6 +223,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void gameOver(boolean won) {
         isGameOver = true;
+        this.hasWon = won; // Store the result
+        timerHandler.removeCallbacks(timerRunnable); // Stop the timer
+
+
         for (int i = 0; i < GRID_SIZE; i++) {
             for (int j = 0; j < GRID_SIZE; j++) {
                 if (cells[i][j].isMine()) {
@@ -199,11 +236,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        if (won) {
-            Toast.makeText(this, "You won!", Toast.LENGTH_LONG).show();
-        } else {
-            Toast.makeText(this, "Game Over! You hit a mine.", Toast.LENGTH_LONG).show();
-        }
+        Toast.makeText(this, "Game Over. Tap any cell to see results.", Toast.LENGTH_SHORT).show();
     }
 
     private void checkWinCondition() {
@@ -220,4 +253,6 @@ public class MainActivity extends AppCompatActivity {
             gameOver(true);
         }
     }
+
+
 }
