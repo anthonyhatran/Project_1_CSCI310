@@ -4,4 +4,8 @@
     <color name="white">#FFFFFFFF</color>
     <color name="grey">#FF808080</color>
     <color name="light_grey">#FFD3D3D3</color>
+
+    <color name="cell_hidden">#4CAF50</color>
+    <color name="cell_revealed">#CCCCCC</color>
+    <color name="cell_mine">#F44336</color>
 </resources>

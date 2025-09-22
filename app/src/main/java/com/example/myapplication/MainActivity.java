@@ -1,19 +1,20 @@
 package com.example.myapplication;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import android.graphics.Color;
 import android.os.Bundle;
-import android.view.ViewGroup;
+import android.view.View;
 import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
-
     private static final int GRID_SIZE = 10;
     private static final int NUM_MINES = 5;
 
@@ -23,6 +24,9 @@ public class MainActivity extends AppCompatActivity {
     private TextView mineCountTextView;
     private TextView timerTextView;
     private ToggleButton modeButton;
+
+    private int flagsRemaining = NUM_MINES;
+    private boolean isGameOver = false;
 
 
     @Override
@@ -39,6 +43,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupGame() {
+        isGameOver = false;
+        flagsRemaining = NUM_MINES;
+        mineCountTextView.setText("Mines: " + flagsRemaining);
+
         initializeCells();
         placeMines();
         calculateAdjacentMines();
@@ -87,27 +95,129 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void createCellButtons() {
+        minefieldGrid.removeAllViews();
         int screenWidth = getResources().getDisplayMetrics().widthPixels;
         int padding = (int) (16 * getResources().getDisplayMetrics().density);
         int buttonSize = (screenWidth - 2 * padding) / GRID_SIZE;
-
 
         for (int i = 0; i < GRID_SIZE; i++) {
             for (int j = 0; j < GRID_SIZE; j++) {
                 Button button = new Button(this);
                 button.setText("");
-                button.setBackgroundColor(Color.LTGRAY);
+                button.setBackgroundColor(ContextCompat.getColor(this, R.color.cell_hidden));
 
                 GridLayout.LayoutParams params = new GridLayout.LayoutParams();
                 params.width = buttonSize;
                 params.height = buttonSize;
                 params.rowSpec = GridLayout.spec(i);
                 params.columnSpec = GridLayout.spec(j);
+                params.setMargins(1, 1, 1, 1);
+
                 button.setLayoutParams(params);
+
+                final int row = i;
+                final int col = j;
+                button.setOnClickListener(v -> onCellClicked(row, col));
 
                 cellButtons[i][j] = button;
                 minefieldGrid.addView(button);
             }
+        }
+    }
+
+    private void onCellClicked(int row, int col) {
+        if (isGameOver || cells[row][col].isRevealed()) {
+            return;
+        }
+
+        if (modeButton.isChecked()) {
+            toggleFlag(row, col);
+        }
+        else {
+            revealCell(row, col);
+        }
+    }
+
+    private void toggleFlag(int row, int col) {
+        Cell cell = cells[row][col];
+        cell.setFlagged(!cell.isFlagged());
+
+        if (cell.isFlagged()) {
+            cellButtons[row][col].setText("🚩");
+            flagsRemaining--;
+        } else {
+            cellButtons[row][col].setText("");
+            flagsRemaining++;
+        }
+        mineCountTextView.setText("Mines: " + flagsRemaining);
+    }
+
+
+    private void revealCell(int row, int col) {
+        Cell cell = cells[row][col];
+
+        if (cell.isFlagged() || cell.isRevealed()) {
+            return;
+        }
+
+        cell.setRevealed(true);
+        cellButtons[row][col].setEnabled(false);
+        cellButtons[row][col].setBackgroundColor(ContextCompat.getColor(this, R.color.cell_revealed));
+
+        if (cell.isMine()) {
+            gameOver(false);
+            return;
+        }
+
+        if (cell.getAdjacentMines() > 0) {
+            cellButtons[row][col].setText(String.valueOf(cell.getAdjacentMines()));
+            cellButtons[row][col].setTextColor(Color.BLACK);
+        }
+        else {
+            for (int dr = -1; dr <= 1; dr++) {
+                for (int dc = -1; dc <= 1; dc++) {
+                    int ni = row + dr;
+                    int nj = col + dc;
+
+                    if (ni >= 0 && ni < GRID_SIZE && nj >= 0 && nj < GRID_SIZE && !cells[ni][nj].isRevealed()) {
+                        revealCell(ni, nj);
+                    }
+                }
+            }
+        }
+        checkWinCondition();
+    }
+
+    private void gameOver(boolean won) {
+        isGameOver = true;
+        for (int i = 0; i < GRID_SIZE; i++) {
+            for (int j = 0; j < GRID_SIZE; j++) {
+                if (cells[i][j].isMine()) {
+                    cellButtons[i][j].setText("💣");
+                    cellButtons[i][j].setBackgroundColor(ContextCompat.getColor(this, R.color.cell_mine));
+                }
+            }
+        }
+
+        if (won) {
+            Toast.makeText(this, "You won!", Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(this, "Game Over! You hit a mine.", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void checkWinCondition() {
+        int unrevealedCells = 0;
+        for (int i = 0; i < GRID_SIZE; i++) {
+            for (int j = 0; j < GRID_SIZE; j++) {
+                if (!cells[i][j].isRevealed()) {
+                    unrevealedCells++;
+                }
+            }
+        }
+
+        if (unrevealedCells == NUM_MINES) {
+            gameOver(true);
         }
     }
 }
