@@ -27,12 +27,6 @@ public class ResultActivity extends AppCompatActivity {
         timeTextView = findViewById(R.id.timeTextView);
         playAgainButton = findViewById(R.id.playAgainButton);
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
-
         Intent intent = getIntent();
         boolean gameWon = intent.getBooleanExtra("GAME_WON", false);
         int timeUsed = intent.getIntExtra("TIME_USED", 0);
@@ -43,7 +37,8 @@ public class ResultActivity extends AppCompatActivity {
             resultTextView.setText(getString(R.string.game_lost));
         }
 
-        timeTextView.setText("Time used: " + timeUsed + " seconds");
+        String timeString = String.format("%02d", timeUsed);
+        timeTextView.setText("Time used: "  + timeString + " seconds");
 
         playAgainButton.setOnClickListener(v -> {
             Intent mainActivityIntent = new Intent(ResultActivity.this, MainActivity.class);

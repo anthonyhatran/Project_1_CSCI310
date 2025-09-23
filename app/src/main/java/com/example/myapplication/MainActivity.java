@@ -38,7 +38,8 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void run() {
             secondsElapsed++;
-            timerTextView.setText(getString(R.string.clock) + " " + secondsElapsed);
+            String timeString = String.format("%02d", secondsElapsed);
+            timerTextView.setText(getString(R.string.clock) + " " + timeString);
             timerHandler.postDelayed(this, 1000);
         }
     };
@@ -73,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
 
         isTimerStarted = false;
         secondsElapsed = 0;
-        timerTextView.setText(getString(R.string.clock) + " 0");
+        timerTextView.setText(getString(R.string.clock) + " 00");
         timerHandler.removeCallbacks(timerRunnable);
 
         isFlaggingMode = false;

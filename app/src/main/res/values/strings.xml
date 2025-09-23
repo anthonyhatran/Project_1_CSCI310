@@ -5,7 +5,7 @@
     <string name="digging_mode">Digging</string>
     <string name="flagging_mode">Flagging</string>
     <string name="game_won">You Won!</string>
-    <string name="game_lost">Game Over!</string>
+    <string name="game_lost">You Lost!</string>
     <string name="play_again">Play Again</string>
 
     <string name="clock">\uD83D\uDD53</string>
