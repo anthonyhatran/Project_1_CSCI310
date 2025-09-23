@@ -203,7 +203,6 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         cell.setRevealed(true);
-        cellButtons[row][col].setEnabled(false);
         cellButtons[row][col].setBackgroundColor(ContextCompat.getColor(this, R.color.cell_revealed));
 
         if (cell.isMine()) {

@@ -3,55 +3,94 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
     tools:context=".MainActivity">
 
     <LinearLayout
-        android:id="@+id/header"
+        android:id="@+id/csciHeader"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/purple_header"
         android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_marginBottom="16dp">
+        android:layout_alignParentTop="true"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="40dp"
+        android:paddingBottom="16dp">
 
         <TextView
-            android:id="@+id/mineCountTextView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            tools:text="🚩 5"
-            android:textSize="24sp"
-            android:textStyle="bold" />
+            android:text="CS310"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"/>
 
         <TextView
-            android:id="@+id/timerTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="end"
-            tools:text="🕒 0"
-            android:textSize="24sp"
-            android:textStyle="bold" />
+            android:text="Anthony Tran"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"/>
     </LinearLayout>
-
-    <GridLayout
-        android:id="@+id/minefieldGrid"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/header"
-        android:layout_centerHorizontal="true"
-        android:columnCount="10"
-        android:rowCount="10"
-        android:background="@android:color/black">
-    </GridLayout>
+        android:layout_height="match_parent"
+        android:layout_below="@id/csciHeader"
+        android:padding="16dp">
 
-    <Button
-        android:id="@+id/modeButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/minefieldGrid"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp"
-        android:textSize="34sp"
-        tools:text="⛏️" />
+        <LinearLayout
+            android:id="@+id/header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:id="@+id/mineCountTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                tools:text="🚩 5"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/timerTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                tools:text="🕒 0"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <GridLayout
+            android:id="@+id/minefieldGrid"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/header"
+            android:layout_centerHorizontal="true"
+            android:columnCount="10"
+            android:rowCount="10"
+            android:background="@android:color/black">
+        </GridLayout>
+
+        <Button
+            android:id="@+id/modeButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/minefieldGrid"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="16dp"
+            android:textSize="34sp"
+            tools:text="⛏"
+
+        android:textColor="@android:color/black"
+        android:background="?attr/selectableItemBackground" />
+
+    </RelativeLayout>
 
 </RelativeLayout>

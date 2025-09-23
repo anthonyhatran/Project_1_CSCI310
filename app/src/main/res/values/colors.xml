@@ -8,4 +8,5 @@
     <color name="cell_hidden">#4CAF50</color>
     <color name="cell_revealed">#CCCCCC</color>
     <color name="cell_mine">#F44336</color>
+    <color name="purple_header">#673AB7</color>
 </resources>
