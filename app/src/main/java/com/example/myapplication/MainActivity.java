@@ -11,7 +11,6 @@ import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import java.util.Random;
 
@@ -24,7 +23,8 @@ public class MainActivity extends AppCompatActivity {
     private GridLayout minefieldGrid;
     private TextView mineCountTextView;
     private TextView timerTextView;
-    private ToggleButton modeButton;
+    private Button modeButton;
+    private boolean isFlaggingMode = false;
 
     private int flagsRemaining = NUM_MINES;
     private boolean isGameOver = false;
@@ -38,11 +38,10 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void run() {
             secondsElapsed++;
-            timerTextView.setText("Time: " + secondsElapsed);
+            timerTextView.setText(getString(R.string.clock) + " " + secondsElapsed);
             timerHandler.postDelayed(this, 1000);
         }
     };
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +53,15 @@ public class MainActivity extends AppCompatActivity {
         timerTextView = findViewById(R.id.timerTextView);
         modeButton = findViewById(R.id.modeButton);
 
+        modeButton.setOnClickListener(v -> {
+            isFlaggingMode = !isFlaggingMode;
+            if (isFlaggingMode) {
+                modeButton.setText(getString(R.string.flag));
+            } else {
+                modeButton.setText(getString(R.string.pick));
+            }
+        });
+
         setupGame();
     }
 
@@ -61,13 +69,15 @@ public class MainActivity extends AppCompatActivity {
         isGameOver = false;
         hasWon = false;
         flagsRemaining = NUM_MINES;
-        mineCountTextView.setText("Mines: " + flagsRemaining);
+        mineCountTextView.setText(getString(R.string.flag) + " " + flagsRemaining);
 
-        // Reset and stop timer
         isTimerStarted = false;
         secondsElapsed = 0;
-        timerTextView.setText("Time: 0");
+        timerTextView.setText(getString(R.string.clock) + " 0");
         timerHandler.removeCallbacks(timerRunnable);
+
+        isFlaggingMode = false;
+        modeButton.setText(getString(R.string.pick));
 
         initializeCells();
         placeMines();
@@ -161,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        if (modeButton.isChecked()) {
+        if (isFlaggingMode) {
             toggleFlag(row, col);
         } else {
             revealCell(row, col);
@@ -173,19 +183,17 @@ public class MainActivity extends AppCompatActivity {
         cell.setFlagged(!cell.isFlagged());
 
         if (cell.isFlagged()) {
-            cellButtons[row][col].setText("🚩");
+            cellButtons[row][col].setText(getString(R.string.flag));
             flagsRemaining--;
         } else {
             cellButtons[row][col].setText("");
             flagsRemaining++;
         }
-        mineCountTextView.setText("Mines: " + flagsRemaining);
+        mineCountTextView.setText(getString(R.string.flag) + " " + flagsRemaining);
     }
 
-
-
     private void revealCell(int row, int col) {
-        if (!isTimerStarted && !modeButton.isChecked()) {
+        if (!isTimerStarted && !isFlaggingMode) {
             timerHandler.postDelayed(timerRunnable, 1000);
             isTimerStarted = true;
         }
@@ -211,7 +219,6 @@ public class MainActivity extends AppCompatActivity {
                 for (int dc = -1; dc <= 1; dc++) {
                     int ni = row + dr;
                     int nj = col + dc;
-
                     if (ni >= 0 && ni < GRID_SIZE && nj >= 0 && nj < GRID_SIZE && !cells[ni][nj].isRevealed()) {
                         revealCell(ni, nj);
                     }
@@ -223,19 +230,17 @@ public class MainActivity extends AppCompatActivity {
 
     private void gameOver(boolean won) {
         isGameOver = true;
-        this.hasWon = won; // Store the result
-        timerHandler.removeCallbacks(timerRunnable); // Stop the timer
-
+        this.hasWon = won;
+        timerHandler.removeCallbacks(timerRunnable);
 
         for (int i = 0; i < GRID_SIZE; i++) {
             for (int j = 0; j < GRID_SIZE; j++) {
                 if (cells[i][j].isMine()) {
-                    cellButtons[i][j].setText("💣");
+                    cellButtons[i][j].setText(getString(R.string.mine));
                     cellButtons[i][j].setBackgroundColor(ContextCompat.getColor(this, R.color.cell_mine));
                 }
             }
         }
-
         Toast.makeText(this, "Game Over. Tap any cell to see results.", Toast.LENGTH_SHORT).show();
     }
 
@@ -253,6 +258,4 @@ public class MainActivity extends AppCompatActivity {
             gameOver(true);
         }
     }
-
-
 }
